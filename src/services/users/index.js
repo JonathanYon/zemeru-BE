@@ -32,7 +32,6 @@ usersRouter.post("/login", async (req, res, next) => {
     const user = await userModel.checkCredential(email, password);
     if (user) {
       const { accessToken, refreshToken } = await jwtAuthentication(user);
-
       res.send({ accessToken, refreshToken });
     } else {
       next(createHttpError(404, "Invalid email or/and password"));
@@ -74,7 +73,7 @@ usersRouter.get("/me", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 // change me
-usersRouter.put("/me", async (req, res, next) => {
+usersRouter.put("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const user = await userModel.findByIdAndUpdate(
       req.user._id,
