@@ -1,6 +1,8 @@
 import userModel from "./schema.js";
 import { Router } from "express";
 import createHttpError from "http-errors";
+import multer from "multer";
+import cloudinaryStorage from "../../utils/cloudinaryy.js";
 import { validationResult } from "express-validator";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
 import { jwtAuthentication } from "../../auth/token.js";
@@ -83,5 +85,29 @@ usersRouter.put("/me", async (req, res, next) => {
     next(error);
   }
 });
+//me avatar
+usersRouter.post(
+  "/me/avatar",
+  multer({ storage: cloudinaryStorage }).single("avatar"),
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const picUrl = req.file.path;
+      const userToModify = await userModel.findByIdAndUpdate(
+        req.user._id,
+        { avatar: picUrl },
+        { new: true }
+      );
+      if (userToModify) {
+        res.send(userToModify);
+      } else {
+        next(createHttpError(404, "Not found!!"));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 export default usersRouter;
