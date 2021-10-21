@@ -10,7 +10,7 @@ const lyricsSchema = new Schema(
     editedLyrics: [{ type: String }],
     releaseDate: { type: Date },
     youtubeLink: { type: String },
-    coverImage: { type: String },
+    coverImage: { type: String, default: "https://bit.ly/3lBk8d3" },
     mezmurType: { type: String, required: true },
     comments: [
       {

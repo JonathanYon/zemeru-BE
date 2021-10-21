@@ -1,11 +1,12 @@
 import lyricModel from "./schema.js";
 import { Router } from "express";
 import createHttpError from "http-errors";
+import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
 
 const lyricsRouter = Router();
 
 //post a lyrics
-lyricsRouter.post("/", async (req, res, next) => {
+lyricsRouter.post("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const lyric = await lyricModel(req.body).save();
     res.status(201).send(lyric._id);
@@ -15,8 +16,30 @@ lyricsRouter.post("/", async (req, res, next) => {
   }
 });
 //get the lyrics
-lyricsRouter.get("/", async (req, res, next) => {
+lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
+    const lyric = await lyricModel.find();
+    if (req.query && req.query.title) {
+      let lyricResult = lyric.filter(
+        (oneLyric) => oneLyric.title === req.query.title
+      );
+      res.send(lyricResult);
+    } else if (req.query && req.query.artist) {
+      let lyricResult = lyric.filter(
+        (oneLyric) => oneLyric.artist === req.query.artist
+      );
+      res.send(lyricResult);
+    } else if (req.query && req.query.officialLyric) {
+      let lyricResult = lyric.filter(
+        (oneLyric) => oneLyric.officialLyric === req.query.officialLyric
+      );
+      res.send(lyricResult);
+    } else if (req.query && req.query.mezmurType) {
+      let lyricResult = lyric.filter(
+        (oneLyric) => oneLyric.mezmurType === req.query.mezmurType
+      );
+      res.send(lyricResult);
+    }
   } catch (error) {
     console.log(error);
     next(error);
