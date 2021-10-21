@@ -2,15 +2,16 @@ import userModel from "./schema.js";
 import { Router } from "express";
 import createHttpError from "http-errors";
 import multer from "multer";
-import cloudinaryStorage from "../../utils/cloudinaryy.js";
 import { validationResult } from "express-validator";
+import { userValidator } from "./validations.js";
+import cloudinaryStorage from "../../utils/cloudinaryy.js";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
 import { jwtAuthentication } from "../../auth/token.js";
 
 const usersRouter = Router();
 
 //register
-usersRouter.post("/account", async (req, res, next) => {
+usersRouter.post("/account", userValidator, async (req, res, next) => {
   try {
     const errorList = validationResult(req);
     if (!errorList.isEmpty()) {
@@ -25,12 +26,13 @@ usersRouter.post("/account", async (req, res, next) => {
   }
 });
 //login
-usersRouter.post("/login", jwtAuthMiddleware, async (req, res, next) => {
+usersRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await userModel.checkCredential(email, password);
     if (user) {
-      const { accessToken, refreshToken } = jwtAuthentication(user);
+      const { accessToken, refreshToken } = await jwtAuthentication(user);
+
       res.send({ accessToken, refreshToken });
     } else {
       next(createHttpError(404, "Invalid email or/and password"));
