@@ -12,6 +12,12 @@ const UsersSchema = new Schema(
       required: false,
       default: "https://bit.ly/3lBk8d3",
     },
+    role: {
+      type: String,
+      required: true,
+      enum: ["User", "Editor"],
+      default: "User",
+    },
     password: {
       type: String,
       required: function () {

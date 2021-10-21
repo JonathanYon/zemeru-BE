@@ -7,6 +7,8 @@ const lyricsRouter = Router();
 //post a lyrics
 lyricsRouter.post("/", async (req, res, next) => {
   try {
+    const lyric = await lyricModel(req.body).save();
+    res.status(201).send(lyric._id);
   } catch (error) {
     console.log(error);
     next(error);

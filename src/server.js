@@ -3,6 +3,7 @@ import cors from "cors";
 import listEndpoints from "express-list-endpoints";
 import mongoose from "mongoose";
 import lyricsRouter from "./services/lyrics/index.js";
+import usersRouter from "./services/users/index.js";
 
 const server = express();
 const port = process.env.PORT || 3003;
@@ -11,6 +12,7 @@ server.use(cors());
 server.use(express.json());
 
 server.use("/lyrics", lyricsRouter);
+server.use("/users", usersRouter);
 
 mongoose.connect(process.env.MONGOS_CON);
 mongoose.connection.on(`connected`, () => {

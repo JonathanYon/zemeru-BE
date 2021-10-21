@@ -9,12 +9,6 @@ const lyricsSchema = new Schema(
     officialLyric: { type: String, required: true },
     editedLyrics: [{ type: String }],
     releaseDate: { type: Date },
-    role: {
-      type: String,
-      required: true,
-      enum: ["User", "Editor"],
-      default: "User",
-    },
     youtubeLink: { type: String },
     coverImage: { type: String },
     mezmurType: { type: String, required: true },
