@@ -38,22 +38,32 @@ usersRouter.post("/login", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-usersRouter.get("/:id", async (req, res, next) => {
+// usersRouter.get("/:id", async (req, res, next) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+// usersRouter.put("/:id", async (req, res, next) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+// usersRouter.delete("/:id", async (req, res, next) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+
+//get me
+usersRouter.get("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-usersRouter.put("/:id", async (req, res, next) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-usersRouter.delete("/:id", async (req, res, next) => {
-  try {
+    res.send(req.user);
   } catch (error) {
     console.log(error);
     next(error);
