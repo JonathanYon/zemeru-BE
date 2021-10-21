@@ -46,8 +46,14 @@ lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 //get lyrics by id
-lyricsRouter.get("/:id", async (req, res, next) => {
+lyricsRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
+    const lyric = await lyricModel.findById(req.params.id);
+    if (lyric) {
+      res.send(lyric);
+    } else {
+      res.send(`lyric ${req.params.id} is NOT found!!`);
+    }
   } catch (error) {
     console.log(error);
     next(error);
