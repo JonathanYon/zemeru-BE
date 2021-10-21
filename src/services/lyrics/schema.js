@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const { Schema, module } = mongoose;
+const { Schema, model } = mongoose;
 
 const lyricsSchema = new Schema(
   {
@@ -27,4 +27,4 @@ const lyricsSchema = new Schema(
   },
   { timestamps: true }
 );
-export default module("Lyrics", lyricsSchema);
+export default model("Lyrics", lyricsSchema);

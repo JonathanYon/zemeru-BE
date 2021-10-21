@@ -20,6 +20,7 @@ const UsersSchema = new Schema(
         }
       },
     },
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     refreshT: { type: String },
     googleId: { type: String },
     facebookId: { type: String },
