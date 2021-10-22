@@ -60,7 +60,7 @@ lyricsRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 //update lyrics
-lyricsRouter.put("/updateLyric/:id", async (req, res, next) => {
+lyricsRouter.put("/updateLyrics/:id", async (req, res, next) => {
   try {
     const lyric = await lyricModel.findByIdAndUpdate(
       req.params.id,
@@ -78,7 +78,29 @@ lyricsRouter.put("/updateLyric/:id", async (req, res, next) => {
     next(error);
   }
 });
-//delete a lyrics
+//get all lyrics that the user make some edits to
+lyricsRouter.get(
+  "/edited/lyrics",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const editedLyrics = await lyricModel.find({
+        editedLyrics: { $exists: true, $ne: [] },
+      });
+      if (editedLyrics) {
+        res.send(editedLyrics);
+      } else {
+        res.send("No edit from users Today");
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+// delete a lyrics(unfortunatly users won't have that power)
+
 lyricsRouter.delete("/:id", async (req, res, next) => {
   try {
   } catch (error) {
