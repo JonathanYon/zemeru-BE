@@ -101,8 +101,14 @@ lyricsRouter.get(
 
 // delete a lyrics(unfortunatly users won't have that power)
 
-lyricsRouter.delete("/:id", async (req, res, next) => {
+lyricsRouter.delete("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
+    const lyric = await lyricModel.findByIdAndDelete(req.params.id);
+    if (lyric) {
+      res.send("Gone for Good!!");
+    } else {
+      res.send(`${req.params.id} NOT FOUND`);
+    }
   } catch (error) {
     console.log(error);
     next(error);
