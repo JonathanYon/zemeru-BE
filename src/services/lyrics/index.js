@@ -60,8 +60,19 @@ lyricsRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 //update lyrics
-lyricsRouter.put("/:id", async (req, res, next) => {
+lyricsRouter.put("/updateLyric/:id", async (req, res, next) => {
   try {
+    const lyric = await lyricModel.findByIdAndUpdate(
+      req.params.id,
+      { $push: { editedLyrics: req.body } },
+
+      { new: true }
+    );
+    if (lyric) {
+      res.send(lyric);
+    } else {
+      next(createHttpError(404, "Not Found!"));
+    }
   } catch (error) {
     console.log(error);
     next(error);
