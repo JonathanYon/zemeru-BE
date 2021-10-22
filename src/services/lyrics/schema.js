@@ -7,7 +7,15 @@ const lyricsSchema = new Schema(
     artist: { type: String, required: true },
     title: { type: String, required: true },
     officialLyric: { type: String, required: true },
-    editedLyrics: [{ type: String }],
+    editedLyrics: [
+      {
+        updatedLyric: String,
+        updatedArtist: String,
+        updatedTitle: String,
+        updatedYoutubeLink: String,
+        updatedCoverImage: String,
+      },
+    ],
     releaseDate: { type: Date },
     youtubeLink: { type: String },
     coverImage: { type: String, default: "https://bit.ly/3lBk8d3" },
