@@ -68,5 +68,21 @@ blogsRouter.put("/:Id", jwtAuthMiddleware, async (req, res, next) => {
     next(createHttpError(404, `post ${req.params.Id} NOT found!!`));
   }
 });
+blogsRouter.delete("/:Id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    if (req.user.role === "Editor") {
+      const post = await blogModel.findByIdAndDelete(req.params.Id);
+      if (post) {
+        res.status(204).send(`Deleted!!`);
+      } else {
+        res.send(`${req.params.Id} NOT found!`);
+      }
+    } else {
+      next(createHttpError(403, "Not Authorized"));
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default blogsRouter;
