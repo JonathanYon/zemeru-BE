@@ -2,6 +2,7 @@ import lyricModel from "./schema.js";
 import { Router } from "express";
 import createHttpError from "http-errors";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
+import adminOnly from "../../auth/admin.js";
 
 const lyricsRouter = Router();
 
@@ -78,7 +79,7 @@ lyricsRouter.put("/updateLyrics/:id", async (req, res, next) => {
     next(error);
   }
 });
-//get all lyrics that the user make some edits to
+//get all lyrics that the user make some edits to (admin)
 lyricsRouter.get(
   "/edited/lyrics",
   jwtAuthMiddleware,
@@ -87,10 +88,14 @@ lyricsRouter.get(
       const editedLyrics = await lyricModel.find({
         editedLyrics: { $exists: true, $ne: [] },
       });
-      if (editedLyrics) {
-        res.send(editedLyrics);
+      if (req.user.role === "Editor") {
+        if (editedLyrics) {
+          res.send(editedLyrics);
+        } else {
+          res.send("No edit from users Today");
+        }
       } else {
-        res.send("No edit from users Today");
+        next(createHttpError(403, "Not authorized, tough luck."));
       }
     } catch (error) {
       console.log(error);
@@ -99,20 +104,29 @@ lyricsRouter.get(
   }
 );
 
-// delete a lyrics(unfortunatly users won't have that power)
+// delete a lyrics(unfortunatly users won't have that power (admin)
 
-lyricsRouter.delete("/:id", jwtAuthMiddleware, async (req, res, next) => {
-  try {
-    const lyric = await lyricModel.findByIdAndDelete(req.params.id);
-    if (lyric) {
-      res.send("Gone for Good!!");
-    } else {
-      res.send(`${req.params.id} NOT FOUND`);
+lyricsRouter.delete(
+  "/:id",
+  jwtAuthMiddleware,
+
+  async (req, res, next) => {
+    try {
+      if (req.user.role === "Editor") {
+        const lyric = await lyricModel.findByIdAndDelete(req.params.id);
+        if (lyric) {
+          res.send("Gone for Good!!");
+        } else {
+          res.send(`${req.params.id} NOT FOUND`);
+        }
+      } else {
+        next(createHttpError(403, "Not authorized, tough luck."));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
+);
 
 export default lyricsRouter;
