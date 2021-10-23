@@ -209,28 +209,30 @@ blogsRouter.delete(
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      const comment = await blogModel.findByIdAndUpdate(
-        {
-          _id: req.params.id,
-          // "comments._id": req.params.commentId,
-          "comments.$.userId": req.user._id,
-        },
-        {
-          $pull: {
-            comments: { _id: req.params.commentId },
+      const blog = await blogModel.findById(req.params.id);
+      if (blog) {
+        const comment = await blogModel.findOneAndUpdate(
+          {
+            comments: {
+              $elemMatch: { _id: req.params.commentId, userId: req.user._id },
+            },
           },
-        },
-        { new: true }
-      );
-      if (comment) {
-        res.send(comment);
-      } else {
-        next(
-          createHttpError(404, `The Post you are looking for does NOT exist!`)
+          {
+            $pull: {
+              comments: { _id: req.params.commentId },
+            },
+          }
         );
+        if (comment) {
+          res.send("Found it and DELETE");
+        } else {
+          res.send("No comment or/and NOT your comment to delete");
+        }
+      } else {
+        next(createHttpError(404, "Blog Not Found"));
       }
     } catch (error) {
-      next(createHttpError(404));
+      next(createHttpError(404, "No blog"));
     }
   }
 );
