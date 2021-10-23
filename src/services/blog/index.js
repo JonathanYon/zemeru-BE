@@ -112,5 +112,24 @@ blogsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
     next(createHttpError(402));
   }
 });
+blogsRouter.get(
+  "/post/:id/comments",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const post = await blogModel.findById(req.params.id);
+      if (post) {
+        const allComments = post.comments;
+        res.send(allComments);
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+    } catch (error) {
+      next(createHttpError(404));
+    }
+  }
+);
 
 export default blogsRouter;
