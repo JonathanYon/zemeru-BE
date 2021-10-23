@@ -38,5 +38,17 @@ blogsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+blogsRouter.get("/:Id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const post = await blogModel.findById(req.params.Id);
+    if (post) {
+      res.send(post);
+    } else {
+      res.send(`blog ${req.params.Id} NOT found!!`);
+    }
+  } catch (error) {
+    next(createHttpError(404, `post ${req.params.Id} NOT found!!`));
+  }
+});
 
 export default blogsRouter;
