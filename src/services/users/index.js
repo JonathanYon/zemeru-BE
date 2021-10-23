@@ -11,15 +11,15 @@ import { jwtAuthentication } from "../../auth/token.js";
 const usersRouter = Router();
 
 //register
-usersRouter.post("/account", userValidator, async (req, res, next) => {
+usersRouter.post("/account", async (req, res, next) => {
   try {
-    const errorList = validationResult(req);
-    if (!errorList.isEmpty()) {
-      next(createHttpError(400, "Bad request"));
-    } else {
-      const newUser = await userModel(req.body).save();
-      res.status(201).send(newUser._id);
-    }
+    // const errorList = validationResult(req);
+    // if (!errorList.isEmpty()) {
+    //   next(createHttpError(400, "Bad request"));
+    // } else {
+    const newUser = await userModel(req.body).save();
+    res.status(201).send(newUser._id);
+    // }
   } catch (error) {
     console.log(error);
     next(error);
