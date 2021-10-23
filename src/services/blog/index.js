@@ -131,5 +131,107 @@ blogsRouter.get(
     }
   }
 );
+blogsRouter.get(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const post = await blogModel.findById(req.params.id);
+      if (post) {
+        const comment = post.comments.find(
+          (com) => com._id.toString() === req.params.commentId // the .toString is very important
+        );
+        if (comment) {
+          res.send(comment);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `The comment you are looking for does NOT exist!`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(createHttpError(404));
+    }
+  }
+);
+blogsRouter.put(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      // const comments = await blogModel.findOne({
+      //   comments: { $elemMatch: { userId: req.user._id } },
+      // });
+      // console.log("--->😍", comments);
+      // if (comments) {
+      const comment = await blogModel.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          "comments._id": req.params.commentId,
+          "comments.$.userId": req.user._id,
+        },
+        {
+          $set: {
+            "comments.$": { ...req.body, userId: req.user._id },
+            // "comments.$.comment": req.body,
+          },
+        },
+        { new: true, runValidators: true }
+      );
 
+      if (comment) {
+        res.send(comment);
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+      // } else {
+      //   res.send("Stop It, You cant!!");
+      // }
+    } catch (error) {
+      console.log(error);
+      next(createHttpError(404));
+    }
+  }
+);
+//unfinished (anyone is deleting anyones now fix tomorow)
+blogsRouter.delete(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const comment = await blogModel.findByIdAndUpdate(
+        {
+          _id: req.params.id,
+          // "comments._id": req.params.commentId,
+          "comments.$.userId": req.user._id,
+        },
+        {
+          $pull: {
+            comments: { _id: req.params.commentId },
+          },
+        },
+        { new: true }
+      );
+      if (comment) {
+        res.send(comment);
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+    } catch (error) {
+      next(createHttpError(404));
+    }
+  }
+);
 export default blogsRouter;
