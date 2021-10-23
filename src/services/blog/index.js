@@ -21,5 +21,22 @@ blogsRouter.post("/", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+blogsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const query = q2m(req.query);
+    console.log(query);
+
+    const total = await blogModel.countDocuments(query.criteria); //will have to finsish the query when i get the posts
+    const posts = await blogModel
+      .find(query.criteria, query.options.fields)
+      .sort()
+      .skip()
+      .limit(3)
+      .populate("authors");
+    res.send(posts);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default blogsRouter;
