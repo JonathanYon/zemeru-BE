@@ -84,5 +84,33 @@ blogsRouter.delete("/:Id", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+//*********************************comment routes******************************** */
+
+//post comment
+
+blogsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const post = await blogModel.findById(req.params.id);
+    if (post) {
+      const postComment = await blogModel.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: {
+            comments: { ...req.body, userId: req.user._id },
+          },
+        },
+        { new: true }
+      );
+      res.send(postComment);
+    } else {
+      next(
+        createHttpError(404, `The Post you are looking for does NOT exist!`)
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    next(createHttpError(402));
+  }
+});
 
 export default blogsRouter;
