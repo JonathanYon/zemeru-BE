@@ -50,5 +50,23 @@ blogsRouter.get("/:Id", jwtAuthMiddleware, async (req, res, next) => {
     next(createHttpError(404, `post ${req.params.Id} NOT found!!`));
   }
 });
+blogsRouter.put("/:Id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    if (req.user.role === "Editor") {
+      const post = await blogModel.findByIdAndUpdate(req.params.Id, req.body, {
+        new: true,
+      });
+      if (post) {
+        res.send(post);
+      } else {
+        res.send(`blog ${req.params.Id} NOT found!!`);
+      }
+    } else {
+      next(createHttpError(403, "Not Authorized"));
+    }
+  } catch (error) {
+    next(createHttpError(404, `post ${req.params.Id} NOT found!!`));
+  }
+});
 
 export default blogsRouter;
