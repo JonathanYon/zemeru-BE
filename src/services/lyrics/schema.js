@@ -10,10 +10,12 @@ const lyricsSchema = new Schema(
     editedLyrics: [
       {
         updatedLyric: String,
-        updatedArtist: String,
-        updatedTitle: String,
-        updatedYoutubeLink: String,
-        updatedCoverImage: String,
+        status: {
+          type: String,
+          enum: ["Aproved", "Rejected", "Pending"],
+          default: "Pending",
+        },
+        userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
       },
     ],
     releaseDate: { type: Date },

@@ -1,8 +1,8 @@
 import lyricModel from "./schema.js";
 import { Router } from "express";
+import diff from "simple-text-diff";
 import createHttpError from "http-errors";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
-import adminOnly from "../../auth/admin.js";
 
 const lyricsRouter = Router();
 
@@ -61,24 +61,38 @@ lyricsRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 //update lyrics
-lyricsRouter.put("/updateLyrics/:id", async (req, res, next) => {
-  try {
-    const lyric = await lyricModel.findByIdAndUpdate(
-      req.params.id,
-      { $push: { editedLyrics: req.body } },
+lyricsRouter.put(
+  "/updateLyrics/:id",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const updatedInfo = {
+        //best hack to input to an array come check again!!
+        updatedLyric: req.body.updatedLyric,
+        userId: req.user._id,
+      };
 
-      { new: true }
-    );
-    if (lyric) {
-      res.send(lyric);
-    } else {
-      next(createHttpError(404, "Not Found!"));
+      const lyric = await lyricModel.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: {
+            editedLyrics: updatedInfo,
+          },
+        },
+
+        { new: true }
+      );
+      if (lyric) {
+        res.send(lyric);
+      } else {
+        next(createHttpError(404, "Not Found!"));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
+);
 //get all lyrics that the user make some edits to (admin)
 lyricsRouter.get(
   "/edited/lyrics",
@@ -90,6 +104,7 @@ lyricsRouter.get(
       });
       if (req.user.role === "Editor") {
         if (editedLyrics) {
+          // const original = await editedLyrics.officialLyric
           res.send(editedLyrics);
         } else {
           res.send("No edit from users Today");
@@ -122,6 +137,19 @@ lyricsRouter.delete(
       } else {
         next(createHttpError(403, "Not authorized, tough luck."));
       }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+// approve or reject lyrics edit proposal by users
+lyricsRouter.put(
+  "/:id/updateLyrics/admin",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
     } catch (error) {
       console.log(error);
       next(error);
