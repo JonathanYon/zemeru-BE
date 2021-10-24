@@ -203,7 +203,7 @@ blogsRouter.put(
     }
   }
 );
-//unfinished (anyone is deleting anyones now fix tomorow)
+
 blogsRouter.delete(
   "/post/:id/comments/:commentId",
   jwtAuthMiddleware,

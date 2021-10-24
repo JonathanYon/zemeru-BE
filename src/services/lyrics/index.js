@@ -99,13 +99,12 @@ lyricsRouter.get(
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      const editedLyrics = await lyricModel.find({
+      const updatedLyrics = await lyricModel.find({
         editedLyrics: { $exists: true, $ne: [] },
       });
       if (req.user.role === "Editor") {
-        if (editedLyrics) {
-          // const original = await editedLyrics.officialLyric
-          res.send(editedLyrics);
+        if (updatedLyrics) {
+          res.send(updatedLyrics);
         } else {
           res.send("No edit from users Today");
         }
@@ -144,17 +143,32 @@ lyricsRouter.delete(
   }
 );
 
-// approve or reject lyrics edit proposal by users
-lyricsRouter.put(
-  "/:id/updateLyrics/admin",
-  jwtAuthMiddleware,
-  async (req, res, next) => {
-    try {
-    } catch (error) {
-      console.log(error);
-      next(error);
+//************************************comments**************************************************** */
+//post comment
+
+lyricsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const post = await lyricModel.findById(req.params.id);
+    if (post) {
+      const postComment = await lyricModel.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: {
+            comments: { ...req.body, userId: req.user._id },
+          },
+        },
+        { new: true }
+      );
+      res.send(postComment);
+    } else {
+      next(
+        createHttpError(404, `The Post you are looking for does NOT exist!`)
+      );
     }
+  } catch (error) {
+    console.log(error);
+    next(createHttpError(402));
   }
-);
+});
 
 export default lyricsRouter;
