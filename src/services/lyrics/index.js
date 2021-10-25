@@ -171,7 +171,7 @@ lyricsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 
-blogsRouter.get(
+lyricsRouter.get(
   "/post/:id/comments",
   jwtAuthMiddleware,
   async (req, res, next) => {
@@ -191,4 +191,35 @@ blogsRouter.get(
   }
 );
 
+lyricsRouter.get(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const post = await lyricModel.findById(req.params.id);
+      if (post) {
+        const comment = post.comments.find(
+          (com) => com._id.toString() === req.params.commentId // the .toString is very important
+        );
+        if (comment) {
+          res.send(comment);
+        } else {
+          next(
+            createHttpError(
+              404,
+              `The comment you are looking for does NOT exist!`
+            )
+          );
+        }
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      next(createHttpError(404));
+    }
+  }
+);
 export default lyricsRouter;
