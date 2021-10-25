@@ -143,6 +143,42 @@ lyricsRouter.delete(
   }
 );
 
+// approve or reject lyrics edit proposal by users
+lyricsRouter.put(
+  "/approve/:lyricsID/admin/:editedID",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      if (req.user.role === "Editor") {
+        const lyrics = await lyricModel.updateMany(
+          {
+            _id: req.params.lyricsID,
+            "editedLyrics._id": req.params.editedID,
+          },
+          [
+            {
+              $set: {
+                officialLyric: {
+                  $arrayElemAt: ["$editedLyrics.updatedLyric", 0],
+                },
+              },
+            },
+          ],
+          { new: true }
+        );
+
+        console.log("hello");
+        res.send(lyrics);
+      } else {
+        res.send("you not admin bra!!");
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
 //************************************comments**************************************************** */
 //post comment
 
