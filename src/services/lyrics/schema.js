@@ -25,6 +25,7 @@ const lyricsSchema = new Schema(
     comments: [
       {
         comment: String, //embedded comments inside the post for the comment
+        userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
       },
     ],
     likes: [{ type: Schema.Types.ObjectId, required: true, ref: "User" }],
