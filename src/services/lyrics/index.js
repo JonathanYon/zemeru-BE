@@ -264,4 +264,37 @@ lyricsRouter.put(
     }
   }
 );
+
+lyricsRouter.delete(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const lyric = await lyricModel.findById(req.params.id);
+      if (lyric) {
+        const comment = await lyricModel.findOneAndUpdate(
+          {
+            comments: {
+              $elemMatch: { _id: req.params.commentId, userId: req.user._id },
+            },
+          },
+          {
+            $pull: {
+              comments: { _id: req.params.commentId },
+            },
+          }
+        );
+        if (comment) {
+          res.send("Found it and DELETE");
+        } else {
+          res.send("No comment or/and NOT your comment to delete");
+        }
+      } else {
+        next(createHttpError(404, "lyric Not Found"));
+      }
+    } catch (error) {
+      next(createHttpError(404, "No lyric"));
+    }
+  }
+);
 export default lyricsRouter;
