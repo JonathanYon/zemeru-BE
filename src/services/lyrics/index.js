@@ -222,4 +222,46 @@ lyricsRouter.get(
     }
   }
 );
+
+lyricsRouter.put(
+  "/post/:id/comments/:commentId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      // const comments = await blogModel.findOne({
+      //   comments: { $elemMatch: { userId: req.user._id } },
+      // });
+      // console.log("--->😍", comments);
+      // if (comments) {
+      const comment = await lyricModel.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          "comments._id": req.params.commentId,
+          "comments.$.userId": req.user._id,
+        },
+        {
+          $set: {
+            "comments.$": { ...req.body, userId: req.user._id },
+            // "comments.$.comment": req.body,
+          },
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (comment) {
+        res.send(comment);
+      } else {
+        next(
+          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        );
+      }
+      // } else {
+      //   res.send("Stop It, You cant!!");
+      // }
+    } catch (error) {
+      console.log(error);
+      next(createHttpError(404));
+    }
+  }
+);
 export default lyricsRouter;
