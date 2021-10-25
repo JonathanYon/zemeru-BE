@@ -143,14 +143,14 @@ lyricsRouter.delete(
   }
 );
 
-// approve or reject lyrics edit proposal by users
+// approve lyrics edit proposal by users
 lyricsRouter.put(
   "/approve/:lyricsID/admin/:editedID",
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
       if (req.user.role === "Editor") {
-        const lyrics = await lyricModel.updateMany(
+        const lyricOverWrite = await lyricModel.updateMany(
           {
             _id: req.params.lyricsID,
             "editedLyrics._id": req.params.editedID,
@@ -166,9 +166,58 @@ lyricsRouter.put(
           ],
           { new: true }
         );
+        if (lyricOverWrite) {
+          const lyric = await lyricModel.findOneAndUpdate(
+            {
+              _id: req.params.lyricsID,
+              editedLyrics: {
+                $elemMatch: { _id: req.params.editedID },
+              },
+            },
+            {
+              $pull: {
+                editedLyrics: { _id: req.params.editedID },
+              },
+            }
+          );
+          console.log("hello");
+          res.send(lyric);
+        } else {
+          res.send("Successfully overWrote but NOT deleted!!");
+        }
+      } else {
+        res.send("you not admin bra!!");
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+// reject lyrics edit proposal by users
+lyricsRouter.delete(
+  "/approve/:lyricsID/admin/:editedID",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      if (req.user.role === "Editor") {
+        const comment = await lyricModel.findOneAndUpdate(
+          {
+            _id: req.params.lyricsID,
+            editedLyrics: {
+              $elemMatch: { _id: req.params.editedID },
+            },
+          },
+          {
+            $pull: {
+              editedLyrics: { _id: req.params.editedID },
+            },
+          }
+        );
 
         console.log("hello");
-        res.send(lyrics);
+        res.send("Gone for good");
       } else {
         res.send("you not admin bra!!");
       }
