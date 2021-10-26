@@ -31,7 +31,7 @@ blogsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
       .find(query.criteria, query.options.fields)
       .sort()
       .skip()
-      .limit(3)
+      .limit(5)
       .populate("authors");
     res.send(posts);
   } catch (error) {
