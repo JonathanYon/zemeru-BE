@@ -10,7 +10,10 @@ const lyricsRouter = Router();
 //post a lyrics
 lyricsRouter.post("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const lyric = await lyricModel(req.body).save();
+    const lyric = await lyricModel({
+      ...req.body,
+      userId: req.user._id,
+    }).save();
     res.status(201).send(lyric._id);
   } catch (error) {
     console.log(error);
@@ -44,7 +47,10 @@ lyricsRouter.post(
 //get the lyrics
 lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const lyric = await lyricModel.find();
+    const lyric = await lyricModel.find().populate({
+      path: "members",
+      select: "-refreshT -__v -createdAt -updatedAt",
+    });
     if (req.query && req.query.title) {
       let lyricResult = lyric.filter(
         (oneLyric) => oneLyric.title === req.query.title
