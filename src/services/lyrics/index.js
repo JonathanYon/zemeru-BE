@@ -56,9 +56,10 @@ lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
       );
       res.send(lyricResult);
     } else if (req.query && req.query.officialLyric) {
-      let lyricResult = lyric.filter(
-        (oneLyric) => oneLyric.officialLyric === req.query.officialLyric
+      let lyricResult = lyric.filter((oneLyric) =>
+        oneLyric.officialLyric.includes(req.query.officialLyric)
       );
+      console.log("መ ዝ ሙ ር", lyricResult);
       res.send(lyricResult);
     } else if (req.query && req.query.mezmurType) {
       let lyricResult = lyric.filter(
