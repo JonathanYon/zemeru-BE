@@ -1,6 +1,7 @@
 import lyricModel from "./schema.js";
 import { Router } from "express";
-import diff from "simple-text-diff";
+import multer from "multer";
+import cloudinaryStorage from "../../utils/cloudinaryy.js";
 import createHttpError from "http-errors";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
 
@@ -16,6 +17,30 @@ lyricsRouter.post("/", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+lyricsRouter.post(
+  "/:id/cover",
+  multer({ storage: cloudinaryStorage }).single("cover"),
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      const picUrl = req.file.path;
+      const cover = await lyricModel.findByIdAndUpdate(
+        req.params.id,
+        { coverImage: picUrl },
+        { new: true }
+      );
+      if (cover) {
+        res.send(cover);
+      } else {
+        next(createHttpError(404, "Not found!!"));
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 //get the lyrics
 lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
@@ -117,9 +142,7 @@ lyricsRouter.get(
     }
   }
 );
-
 // delete a lyrics(unfortunatly users won't have that power (admin)
-
 lyricsRouter.delete(
   "/:id",
   jwtAuthMiddleware,
@@ -142,7 +165,6 @@ lyricsRouter.delete(
     }
   }
 );
-
 // approve lyrics edit proposal by users
 lyricsRouter.put(
   "/approve/:lyricsID/admin/:editedID",
@@ -194,7 +216,6 @@ lyricsRouter.put(
     }
   }
 );
-
 // reject lyrics edit proposal by users
 lyricsRouter.delete(
   "/approve/:lyricsID/admin/:editedID",
@@ -313,36 +334,22 @@ lyricsRouter.put(
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      // const comments = await blogModel.findOne({
-      //   comments: { $elemMatch: { userId: req.user._id } },
-      // });
-      // console.log("--->😍", comments);
-      // if (comments) {
-      const comment = await lyricModel.findOneAndUpdate(
-        {
-          _id: req.params.id,
-          "comments._id": req.params.commentId,
-          "comments.$.userId": req.user._id,
-        },
-        {
-          $set: {
-            "comments.$": { ...req.body, userId: req.user._id },
-            // "comments.$.comment": req.body,
-          },
-        },
-        { new: true, runValidators: true }
-      );
-
+      const comment = await lyricModel.findById(req.params.id);
       if (comment) {
-        res.send(comment);
-      } else {
-        next(
-          createHttpError(404, `The Post you are looking for does NOT exist!`)
+        const commentUpdate = await lyricModel.findOneAndUpdate(
+          { _id: req.params.commentId, userId: req.user._id },
+          { $set: { "comments.$": req.body } },
+          { new: true }
         );
+        if (commentUpdate) {
+          res.send(commentUpdate);
+        } else {
+          res.send("Not UPDATED");
+        }
+        res.send("Found");
+      } else {
+        res.send("No such comment");
       }
-      // } else {
-      //   res.send("Stop It, You cant!!");
-      // }
     } catch (error) {
       console.log(error);
       next(createHttpError(404));
