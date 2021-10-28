@@ -48,7 +48,7 @@ lyricsRouter.post(
 lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const lyric = await lyricModel.find().populate({
-      path: "members",
+      path: "userId",
       select: "-refreshT -__v -createdAt -updatedAt",
     });
     if (req.query && req.query.title) {
