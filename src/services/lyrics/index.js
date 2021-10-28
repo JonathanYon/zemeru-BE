@@ -81,7 +81,7 @@ lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
 
 lyricsRouter.get("/all", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const lyric = await lyricModel.find().limit(10);
+    const lyric = await lyricModel.find().limit(10).populate("userId");
     res.send(lyric);
   } catch (error) {
     console.log(error);
