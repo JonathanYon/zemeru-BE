@@ -72,6 +72,8 @@ lyricsRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
         (oneLyric) => oneLyric.mezmurType === req.query.mezmurType
       );
       res.send(lyricResult);
+    } else {
+      res.send(lyric);
     }
   } catch (error) {
     console.log(error);
