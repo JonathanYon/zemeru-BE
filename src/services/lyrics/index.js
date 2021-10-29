@@ -299,7 +299,9 @@ lyricsRouter.get(
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      const post = await lyricModel.findById(req.params.id);
+      const post = await lyricModel
+        .findById(req.params.id)
+        .populate({ path: "comments.userId" });
       if (post) {
         const allComments = post.comments;
         res.send(allComments);
