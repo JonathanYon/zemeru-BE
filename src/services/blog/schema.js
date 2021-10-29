@@ -7,6 +7,7 @@ const blogSchema = new Schema(
     category: { type: String, required: true },
     title: { type: String, required: true },
     cover: { type: String, required: true },
+    youtubeLink: { type: String },
     authors: [{ type: Schema.Types.ObjectId, required: true, ref: "User" }],
     content: { type: String, required: true },
     comments: [
