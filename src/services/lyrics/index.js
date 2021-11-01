@@ -91,7 +91,7 @@ lyricsRouter.get("/all", jwtAuthMiddleware, async (req, res, next) => {
 //get lyrics by id
 lyricsRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const lyric = await lyricModel.findById(req.params.id);
+    const lyric = await lyricModel.findById(req.params.id).populate("userId");
     if (lyric) {
       res.send(lyric);
     } else {
@@ -348,30 +348,29 @@ lyricsRouter.get(
   }
 );
 
+//this is not working yet!!
 lyricsRouter.put(
   "/post/:id/comments/:commentId",
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      const comment = await lyricModel.findById(req.params.id);
-      if (comment) {
-        const commentUpdate = await lyricModel.findOneAndUpdate(
-          { _id: req.params.commentId, userId: req.user._id },
-          { $set: { "comments.$": req.body } },
-          { new: true }
-        );
-        if (commentUpdate) {
-          res.send(commentUpdate);
-        } else {
-          res.send("Not UPDATED");
-        }
-        res.send("Found");
+      const commentUpdate = await lyricModel.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          "comments.$.userId": req.user._id,
+          "comments.$._id": req.params.commentId,
+        },
+        { $set: { "comments.$": req.body, userId: req.user._id } },
+        { new: true }
+      );
+      if (commentUpdate) {
+        res.send(commentUpdate);
       } else {
-        res.send("No such comment");
+        next(createHttpError(404, "Credential problem"));
       }
     } catch (error) {
       console.log(error);
-      next(createHttpError(404));
+      next(createHttpError(404, "Not Found"));
     }
   }
 );
