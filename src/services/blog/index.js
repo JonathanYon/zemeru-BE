@@ -117,7 +117,9 @@ blogsRouter.get(
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
-      const post = await blogModel.findById(req.params.id);
+      const post = await blogModel
+        .findById(req.params.id)
+        .populate({ path: "comments.userId" });
       if (post) {
         const allComments = post.comments;
         res.send(allComments);

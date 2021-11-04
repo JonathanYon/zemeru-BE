@@ -25,7 +25,7 @@ const lyricsSchema = new Schema(
     mezmurType: { type: String, required: true },
     comments: [
       {
-        comment: String, //embedded comments inside the post for the comment
+        comment: String, //embedded comments inside the lyrics for the comment
         userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
       },
     ],
