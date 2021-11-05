@@ -21,7 +21,11 @@ const lyricsSchema = new Schema(
     ],
     releaseDate: { type: Date },
     youtubeLink: { type: String },
-    coverImage: { type: String, default: "https://bit.ly/3lBk8d3" },
+    coverImage: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/catholic-university-of-murcia/image/upload/v1636118231/Zemeru/sibhzfvvgrbxdrs0zopz.png",
+    },
     mezmurType: { type: String, required: true },
     comments: [
       {
