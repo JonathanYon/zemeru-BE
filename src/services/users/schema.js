@@ -18,6 +18,8 @@ const UsersSchema = new Schema(
       enum: ["User", "Editor"],
       default: "User",
     },
+    bio: { type: String },
+    token: { type: Number },
     password: {
       type: String,
       required: function () {
