@@ -111,4 +111,20 @@ usersRouter.post(
   }
 );
 
+//generate a new refresh token
+usersRouter.post("/refreshToken", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const { currentRefreshToken } = req.body;
+    console.log(currentRefreshToken);
+    const { accessToken, refreshToken } = await refreshTokenAuth(
+      currentRefreshToken
+    );
+
+    res.send({ accessToken, refreshToken });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default usersRouter;
