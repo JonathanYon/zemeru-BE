@@ -127,4 +127,15 @@ usersRouter.post("/refreshToken", async (req, res, next) => {
   }
 });
 
+//logouts(session)
+usersRouter.delete("/logout", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    req.user.refreshT = null;
+    await req.user.save();
+    res.send();
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default usersRouter;
