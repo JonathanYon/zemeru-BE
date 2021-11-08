@@ -250,7 +250,55 @@ usersRouter.post(
     }
   }
 );
+//folowing
+usersRouter.post("/following/me", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    // const me = await userModel.findById(req.user._id);
+    const userCheck = req.user.following.find(
+      (user) => user.userId.toString() === req.body.userId
+    );
 
+    console.log("following---", req.user.following);
+    console.log("T/F****", userCheck);
+
+    if (!userCheck) {
+      const meFollowing = await userModel.findByIdAndUpdate(
+        req.user._id,
+        {
+          $push: {
+            following: { ...req.body, userId: req.body.userId },
+          },
+        },
+        { new: true }
+      );
+      await userModel.findByIdAndUpdate(req.body.userId, {
+        $push: {
+          followers: { ...req.body, userId: req.user._id },
+        },
+      });
+      res.send(meFollowing);
+    } else {
+      const meUnfollowing = await userModel.findByIdAndUpdate(
+        req.user._id,
+        {
+          $pull: {
+            following: { userId: req.body.userId },
+          },
+        },
+        { new: true }
+      );
+      await userModel.findByIdAndUpdate(req.body.userId, {
+        $pull: {
+          followers: { userId: req.user._id },
+        },
+      });
+      res.send(meUnfollowing);
+    }
+  } catch (error) {
+    next(createHttpError(404, "Something Wrong"));
+    console.log(error);
+  }
+});
 //generate a new refresh token
 usersRouter.post("/refreshToken", async (req, res, next) => {
   try {
