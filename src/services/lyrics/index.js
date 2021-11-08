@@ -1,4 +1,5 @@
 import lyricModel from "./schema.js";
+import usersModel from "../users/schema.js";
 import { Router } from "express";
 import multer from "multer";
 import cloudinaryStorage from "../../utils/cloudinaryy.js";
@@ -14,6 +15,11 @@ lyricsRouter.post("/", jwtAuthMiddleware, async (req, res, next) => {
       ...req.body,
       userId: req.user._id,
     }).save();
+    if (lyric) {
+      await usersModel.findByIdAndUpdate(req.user._id, {
+        $inc: { token: +10 },
+      });
+    }
     res.status(201).send(lyric._id);
   } catch (error) {
     console.log(error);
@@ -34,6 +40,7 @@ lyricsRouter.post(
         { new: true }
       );
       if (cover) {
+        await usersModel.findByIdAndUpdate(req.user._id, { token: token + 1 });
         res.send(cover);
       } else {
         next(createHttpError(404, "Not found!!"));
@@ -110,8 +117,8 @@ lyricsRouter.put(
     try {
       const updatedInfo = {
         //best hack to input to an array come check again!!
-        updatedLyric: req.body.updatedLyric,
         userId: req.user._id,
+        updatedLyric: req.body.updatedLyric,
       };
 
       const lyric = await lyricModel.findByIdAndUpdate(
@@ -206,21 +213,33 @@ lyricsRouter.put(
           { new: true }
         );
         if (lyricOverWrite) {
-          const lyric = await lyricModel.findOneAndUpdate(
-            {
-              _id: req.params.lyricsID,
-              editedLyrics: {
-                $elemMatch: { _id: req.params.editedID },
+          const lyric = await lyricModel
+            .findOneAndUpdate(
+              {
+                _id: req.params.lyricsID,
+                editedLyrics: {
+                  $elemMatch: { _id: req.params.editedID },
+                },
               },
-            },
-            {
-              $pull: {
-                editedLyrics: { _id: req.params.editedID },
-              },
-            }
+              {
+                $pull: {
+                  editedLyrics: { _id: req.params.editedID },
+                },
+              }
+              // { new: true }
+            )
+            .populate("editedLyrics.userId");
+          const delLyr = lyric.editedLyrics.filter(
+            (ele) => ele._id.toString() === req.params.editedID.toString()
           );
+          await usersModel.findByIdAndUpdate(delLyr[0].userId._id, {
+            $inc: { token: +5 },
+          });
           console.log("hello");
-          res.send(lyric);
+          res.send({
+            officialLyric: lyric.officialLyric,
+            approved: delLyr[0].userId._id,
+          });
         } else {
           res.send("Successfully overWrote but NOT deleted!!");
         }
@@ -235,29 +254,36 @@ lyricsRouter.put(
 );
 // reject lyrics edit proposal by users
 lyricsRouter.delete(
-  "/approve/:lyricsID/admin/:editedID",
+  "/reject/:lyricsID/admin/:editedID",
   jwtAuthMiddleware,
   async (req, res, next) => {
     try {
       if (req.user.role === "Editor") {
-        const comment = await lyricModel.findOneAndUpdate(
-          {
-            _id: req.params.lyricsID,
-            editedLyrics: {
-              $elemMatch: { _id: req.params.editedID },
+        const lyrics = await lyricModel
+          .findOneAndUpdate(
+            {
+              _id: req.params.lyricsID,
+              editedLyrics: {
+                $elemMatch: { _id: req.params.editedID },
+              },
             },
-          },
-          {
-            $pull: {
-              editedLyrics: { _id: req.params.editedID },
-            },
-          }
+            {
+              $pull: {
+                editedLyrics: { _id: req.params.editedID },
+              },
+            }
+          )
+          .populate("editedLyrics.userId");
+        const delLyr = lyrics.editedLyrics.filter(
+          (ele) => ele._id.toString() === req.params.editedID.toString()
         );
-
-        console.log("hello");
-        res.send("Gone for good");
+        await usersModel.findByIdAndUpdate(delLyr[0].userId._id, {
+          $inc: { token: -5 },
+        });
+        console.log("hello", delLyr);
+        res.send({ message: "Gone for good", delLyrics: delLyr[0].userId._id });
       } else {
-        res.send("you not admin bra!!");
+        res.send("you not admin!!");
       }
     } catch (error) {
       console.log(error);
@@ -282,6 +308,11 @@ lyricsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
         },
         { new: true }
       );
+      if (postComment) {
+        await usersModel.findByIdAndUpdate(req.user._id, {
+          $inc: { token: +1 },
+        });
+      }
       res.send(postComment);
     } else {
       next(
