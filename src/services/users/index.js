@@ -132,6 +132,35 @@ usersRouter.get(
     }
   }
 );
+//comments of a user in blog
+usersRouter.get(
+  "/blogs/comments/:userId",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      console.log("am in try---");
+      const commentsLyr = await blogModel.find({
+        "comments.userId": req.params.userId,
+      });
+      if (commentsLyr) {
+        console.log("am in if---");
+        let idAndComments = commentsLyr.map((el) => {
+          return {
+            id: el._id,
+            comments: el.comments.map((el) => el.comment),
+          };
+        });
+        res.send(idAndComments);
+      } else {
+        res.send("no comments");
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
 // change me
 usersRouter.put("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
