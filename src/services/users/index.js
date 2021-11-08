@@ -85,6 +85,12 @@ usersRouter.get(
       const commentsLyr = await lyricsModel.find({
         "comments.userId": req.user._id,
       });
+      const lyrAuthor = await lyricsModel.find({
+        userId: req.user._id,
+      });
+      // if(commentsLyr && lyrAuthor){
+      //   res.send()
+      // }
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
@@ -93,7 +99,7 @@ usersRouter.get(
             comments: el.comments.map((el) => el.comment),
           };
         });
-        res.send(idAndComments);
+        res.send({ commAndID: idAndComments, lyrics: lyrAuthor });
       } else {
         res.send("no comments");
       }
@@ -170,6 +176,9 @@ usersRouter.get(
       const commentsLyr = await lyricsModel.find({
         "comments.userId": req.params.userId,
       });
+      const lyrAuthor = await lyricsModel.find({
+        userId: req.params.userId,
+      });
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
@@ -178,7 +187,7 @@ usersRouter.get(
             comments: el.comments.map((el) => el.comment),
           };
         });
-        res.send(idAndComments);
+        res.send({ commAndID: idAndComments, lyrics: lyrAuthor });
       } else {
         res.send("no comments");
       }
@@ -188,7 +197,7 @@ usersRouter.get(
     }
   }
 );
-//comments of a user in lyrics
+//other user
 usersRouter.get("/:userId", jwtAuthMiddleware, async (req, res, next) => {
   try {
     console.log("am in try---");
