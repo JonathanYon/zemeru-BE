@@ -74,7 +74,7 @@ usersRouter.get("/me", jwtAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-//my comments
+//my comments in lyrics
 usersRouter.get(
   "/lyrics/comments/me",
   jwtAuthMiddleware,
@@ -103,8 +103,35 @@ usersRouter.get(
     }
   }
 );
-//my comments
+//my comments in blog
+usersRouter.get(
+  "/blogs/comments/me",
+  jwtAuthMiddleware,
+  async (req, res, next) => {
+    try {
+      console.log("am in try---");
 
+      const commentsLyr = await blogModel.find({
+        "comments.userId": req.user._id,
+      });
+      if (commentsLyr) {
+        console.log("am in if---");
+        let idAndComments = commentsLyr.map((el) => {
+          return {
+            id: el._id,
+            comments: el.comments.map((el) => el.comment),
+          };
+        });
+        res.send(idAndComments);
+      } else {
+        res.send("no comments");
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 // change me
 usersRouter.put("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
