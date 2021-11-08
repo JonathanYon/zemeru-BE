@@ -96,7 +96,7 @@ usersRouter.post(
       const picUrl = req.file.path;
       const userToModify = await userModel.findByIdAndUpdate(
         req.user._id,
-        { avatar: picUrl, token: token + 50 },
+        { avatar: picUrl, $inc: { token: +50 } },
         { new: true }
       );
       if (userToModify) {
