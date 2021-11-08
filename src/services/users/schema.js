@@ -19,7 +19,7 @@ const UsersSchema = new Schema(
       default: "User",
     },
     bio: { type: String },
-    token: { type: Number },
+    token: { type: Number, default: 50 },
     password: {
       type: String,
       required: function () {

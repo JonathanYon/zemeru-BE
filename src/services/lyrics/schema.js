@@ -8,6 +8,8 @@ const lyricsSchema = new Schema(
     title: { type: String, required: true },
     officialLyric: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+    editorId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+
     editedLyrics: [
       {
         updatedLyric: String,
@@ -16,7 +18,6 @@ const lyricsSchema = new Schema(
           enum: ["Aproved", "Rejected", "Pending"],
           default: "Pending",
         },
-        userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
       },
     ],
     releaseDate: { type: Date },
