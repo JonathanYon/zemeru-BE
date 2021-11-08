@@ -188,6 +188,21 @@ usersRouter.get(
     }
   }
 );
+//comments of a user in lyrics
+usersRouter.get("/:userId", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    console.log("am in try---");
+    const user = await userModel.findById(req.params.userId);
+    if (user) {
+      res.send(user);
+    } else {
+      next(createHttpError(404, "User NOT found"));
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 // change me
 usersRouter.put("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
