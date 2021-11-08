@@ -3,6 +3,7 @@ import q2m from "query-to-mongo";
 import createHttpError from "http-errors";
 import { jwtAuthMiddleware } from "../../auth/jwtMiddleware.js";
 import blogModel from "./schema.js";
+import userModel from "../users/schema.js";
 
 const blogsRouter = Router();
 
@@ -101,6 +102,11 @@ blogsRouter.post("/post/:id", jwtAuthMiddleware, async (req, res, next) => {
         },
         { new: true }
       );
+      if (postComment) {
+        await userModel.findByIdAndUpdate(req.user._id, {
+          $inc: { token: +1 },
+        });
+      }
       res.send(postComment);
     } else {
       next(
