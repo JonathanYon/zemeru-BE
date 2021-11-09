@@ -89,8 +89,14 @@ usersRouter.get(
         userId: req.user._id,
       });
       const lyrEditor = await lyricsModel.find({
-        "editedLyrics.$.userId": req.params.userId,
+        "editedLyrics.$.userId": req.user._id,
       });
+
+      // const myEdit = lyrEditor
+      //   .map((ele) => ele.editedLyrics)
+      //   .flat()
+      //   .filter((com) => com.userId === req.user._id).length;
+
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
@@ -103,7 +109,7 @@ usersRouter.get(
         res.send({
           commAndID: idAndComments,
           lyrics: lyrAuthor,
-          myEdits: lyrEditor.length,
+          myEdits: lyrEditor.map((ele) => ele.editedLyrics).flat(),
         });
       } else {
         res.send("no comments");
