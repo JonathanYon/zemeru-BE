@@ -96,6 +96,7 @@ usersRouter.get(
         let idAndComments = commentsLyr.map((el) => {
           return {
             id: el._id,
+            title: el.title,
             comments: el.comments.map((el) => el.comment),
           };
         });
@@ -125,6 +126,7 @@ usersRouter.get(
         let idAndComments = commentsLyr.map((el) => {
           return {
             id: el._id,
+            title: el.title,
             comments: el.comments.map((el) => el.comment),
           };
         });
@@ -153,6 +155,7 @@ usersRouter.get(
         let idAndComments = commentsLyr.map((el) => {
           return {
             id: el._id,
+            title: el.title,
             comments: el.comments.map((el) => el.comment),
           };
         });
@@ -179,15 +182,23 @@ usersRouter.get(
       const lyrAuthor = await lyricsModel.find({
         userId: req.params.userId,
       });
+      const lyrEditor = await lyricsModel.find({
+        "editedLyrics.$.userId": req.params.userId,
+      });
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
           return {
             id: el._id,
+            title: el.title,
             comments: el.comments.map((el) => el.comment),
           };
         });
-        res.send({ commAndID: idAndComments, lyrics: lyrAuthor });
+        res.send({
+          commAndID: idAndComments,
+          lyricsAuthor: lyrAuthor,
+          lyricsEditor: lyrEditor,
+        });
       } else {
         res.send("no comments");
       }
