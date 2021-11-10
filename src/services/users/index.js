@@ -169,6 +169,7 @@ usersRouter.get(
           return {
             id: el._id,
             title: el.title,
+            author: el.authors[0].username,
             comments: el.comments.map((el) => el.comment),
           };
         });
