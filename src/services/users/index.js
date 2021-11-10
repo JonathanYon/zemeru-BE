@@ -128,15 +128,18 @@ usersRouter.get(
     try {
       console.log("am in try---");
 
-      const commentsLyr = await blogModel.find({
-        "comments.userId": req.user._id,
-      });
+      const commentsLyr = await blogModel
+        .find({
+          "comments.userId": req.user._id,
+        })
+        .populate("authors");
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
           return {
             id: el._id,
             title: el.title,
+            author: el.authors[0].username,
             comments: el.comments.map((el) => el.comment),
           };
         });
