@@ -160,9 +160,11 @@ usersRouter.get(
   async (req, res, next) => {
     try {
       console.log("am in try---");
-      const commentsLyr = await blogModel.find({
-        "comments.userId": req.params.userId,
-      });
+      const commentsLyr = await blogModel
+        .find({
+          "comments.userId": req.params.userId,
+        })
+        .populate("authors");
       if (commentsLyr) {
         console.log("am in if---");
         let idAndComments = commentsLyr.map((el) => {
