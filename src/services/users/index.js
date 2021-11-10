@@ -209,8 +209,8 @@ usersRouter.get(
         });
         res.send({
           commAndID: idAndComments,
-          // lyricsAuthor: lyrAuthor,
-          lyricsEditor: lyrEditor,
+          lyrics: lyrAuthor,
+          myEdits: lyrEditor.map((ele) => ele.editedLyrics).flat(),
         });
       } else {
         res.send("no comments");
