@@ -27,25 +27,64 @@ server.use("/users", usersRouter);
 server.use("/blogs", blogsRouter);
 server.use("/messages", messagesRouter);
 
+// mongoose.connect(process.env.MONGOS_CON);
+// mongoose.connection.on(`connected`, () => {
+//   console.log(`🎁 mongo connected Successfully!!`);
+//   server.listen(port, () => {
+//     console.table(listEndpoints(server));
+//     console.log(`server running on: ${port}`);
+//   });
+// });
+
+// mongoose.connection.once("open", () => {
+//   console.log("another one");
+//   const msgCollection = mongoose.connection.collection("Messages");
+//   const changeStream = msgCollection.watch();
+//   changeStream.on("change", (change) => {
+//     console.log("change", change);
+// if (change.operationType === "insert"){
+//   const messageDetaile = change.fullDocument
+//   pusher.trigger("messages", "inserted", {
+//     from: messageDetaile.user,
+//     message: messageDetaile.message
+//   })
+// }else{
+
+// }
+//   });
+// });
+
+//------------------------removable+++++++++++++++++++++++++++++++++++++
+
 mongoose.connect(process.env.MONGOS_CON);
-mongoose.connection.on(`connected`, () => {
-  // the string "connected" 👆☝ has to be "connected" nothing more nothing less
+const db = mongoose.connection;
+
+db.once(`open`, () => {
   console.log(`🎁 mongo connected Successfully!!`);
-  server.listen(port, () => {
-    console.table(listEndpoints(server));
-    console.log(`server running on: ${port}`);
+  const msgCollection = db.collection("messages");
+  msgCollection.watch().on("change", (change) => {
+    console.log("change--", change);
+    if (change.operationType === "insert") {
+      const messageDetails = change.fullDocument;
+      pusher.trigger("messages", "inserted", {
+        from: messageDetails.from,
+        message: messageDetails.message,
+        to: messageDetails.to,
+      });
+    } else {
+      console.log("💀Error triggering Pusher😳");
+    }
   });
 });
 
-mongoose.connection.once("open", () => {
-  console.log("another one");
-  const msgCollection = mongoose.connection.collection("Messages");
-  const changeStream = msgCollection.watch();
-  changeStream.on("change", (change) => {
-    console.log(change);
-  });
+server.listen(port, () => {
+  console.table(listEndpoints(server));
+  console.log(`server running on: ${port}`);
 });
 
+//------------------------removable****************++++++++++++++++++++++++++++
+
+//---------------------------------------------
 mongoose.connection.on(`error`, (err) => {
   console.log(`Mongo Error: ${err}`);
 });
