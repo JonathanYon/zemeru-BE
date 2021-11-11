@@ -36,25 +36,7 @@ server.use("/messages", messagesRouter);
 //   });
 // });
 
-// mongoose.connection.once("open", () => {
-//   console.log("another one");
-//   const msgCollection = mongoose.connection.collection("Messages");
-//   const changeStream = msgCollection.watch();
-//   changeStream.on("change", (change) => {
-//     console.log("change", change);
-// if (change.operationType === "insert"){
-//   const messageDetaile = change.fullDocument
-//   pusher.trigger("messages", "inserted", {
-//     from: messageDetaile.user,
-//     message: messageDetaile.message
-//   })
-// }else{
-
-// }
-//   });
-// });
-
-//------------------------removable+++++++++++++++++++++++++++++++++++++
+//------------------------to make it work with pusher+++++++++++++++++++++++++++++++++++++
 
 mongoose.connect(process.env.MONGOS_CON);
 const db = mongoose.connection;
@@ -82,9 +64,8 @@ server.listen(port, () => {
   console.log(`server running on: ${port}`);
 });
 
-//------------------------removable****************++++++++++++++++++++++++++++
+//------------------------++++++++++++++++++++++++++++
 
-//---------------------------------------------
 mongoose.connection.on(`error`, (err) => {
   console.log(`Mongo Error: ${err}`);
 });
