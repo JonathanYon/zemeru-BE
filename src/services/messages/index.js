@@ -12,12 +12,30 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
       from: req.user._id,
       to: req.params.id,
     };
+    const reply = {
+      from: req.params.id,
+      to: req.user._id,
+    };
 
     const message = await messageModel.findOne(chat);
-    // console.log("message", message);
+    const message2 = await messageModel.findOne(reply);
+    console.log("message--->", message);
+    console.log("message---2", message2);
     if (message) {
       const addMessage = await messageModel.findOneAndUpdate(
         chat,
+        {
+          $push: {
+            messages: { ...req.body, from: req.user._id, to: req.params.id },
+          },
+        },
+        { new: true }
+      );
+      //   console.log("addmessage", addMessage);
+      res.status(201).send(addMessage);
+    } else if (message2) {
+      const addMessage = await messageModel.findOneAndUpdate(
+        reply,
         {
           $push: {
             messages: { ...req.body, from: req.user._id, to: req.params.id },
