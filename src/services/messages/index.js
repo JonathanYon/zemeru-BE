@@ -88,4 +88,26 @@ messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
     next(createHttpError(404));
   }
 });
+//get my messages
+messagesRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const chatMe = await messageModel.findOne({ from: req.params.id });
+    const chatYou = await messageModel.findOne({ to: req.params.id });
+    // console.log("chatme--", chatMe);
+    // console.log("chat you", chatYou);
+    if (chatMe && chatYou) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else if (chatMe) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else if (chatYou) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else {
+      next(
+        createHttpError(404, `The Post you are looking for does NOT exist!`)
+      );
+    }
+  } catch (error) {
+    next(createHttpError(404));
+  }
+});
 export default messagesRouter;
