@@ -36,6 +36,7 @@
     "multer": "^1.4.3",
     "multer-storage-cloudinary": "^4.0.0",
     "npm": "^8.1.1",
+    "pusher": "^5.0.0",
     "query-to-mongo": "^0.10.1",
     "simple-text-diff": "^1.7.0"
   },
