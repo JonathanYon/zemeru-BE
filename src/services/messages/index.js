@@ -69,20 +69,13 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
 //get my messages
 messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const chatMe = await messageModel.find({ from: req.user._id });
-    const chatYou = await messageModel.find({ to: req.user._id });
-    // console.log("chatme--", chatMe);
-    // console.log("chat you", chatYou);
-    if (chatMe && chatYou) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
-    } else if (chatMe) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
-    } else if (chatYou) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    const chatMe = await messageModel.find({
+      $or: [{ from: req.user._id }, { to: req.user._id }],
+    });
+    if (chatMe) {
+      res.send(chatMe);
     } else {
-      next(
-        createHttpError(404, `The Post you are looking for does NOT exist!`)
-      );
+      next(createHttpError(404, "Not Chats to be Found!"));
     }
   } catch (error) {
     next(createHttpError(404));
@@ -91,20 +84,13 @@ messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
 //get my messages
 messagesRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const chatMe = await messageModel.findOne({ from: req.params.id });
-    const chatYou = await messageModel.findOne({ to: req.params.id });
-    // console.log("chatme--", chatMe);
-    // console.log("chat you", chatYou);
-    if (chatMe && chatYou) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
-    } else if (chatMe) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
-    } else if (chatYou) {
-      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    const chatMe = await messageModel.find({
+      $or: [{ from: req.params.id }, { to: req.params.id }],
+    });
+    if (chatMe) {
+      res.send(chatMe);
     } else {
-      next(
-        createHttpError(404, `The Post you are looking for does NOT exist!`)
-      );
+      next(createHttpError(404, "Not Chats to be Found!"));
     }
   } catch (error) {
     next(createHttpError(404));
