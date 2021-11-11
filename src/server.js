@@ -50,8 +50,17 @@ db.once(`open`, () => {
       const messageDetails = change.fullDocument;
       pusher.trigger("messages", "inserted", {
         from: messageDetails.from,
-        message: messageDetails.message,
+        message: messageDetails.messages,
         to: messageDetails.to,
+        createdAt: messageDetails.createdAt,
+      });
+    } else if (change.operationType === "update") {
+      const messageDetails = change.updateDescription;
+      pusher.trigger("messages", "updated", {
+        // from: messageDetails.from,
+        message: messageDetails.updatedFields,
+        // to: messageDetails.to,
+        // createdAt: messageDetails.createdAt,
       });
     } else {
       console.log("💀Error triggering Pusher😳");
