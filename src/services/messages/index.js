@@ -5,7 +5,7 @@ import messageModel from "./schema.js";
 
 const messagesRouter = Router();
 
-//post a lyrics
+//message exchange
 messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const chat = {
@@ -19,8 +19,8 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
 
     const message = await messageModel.findOne(chat);
     const message2 = await messageModel.findOne(reply);
-    console.log("message--->", message);
-    console.log("message---2", message2);
+    // console.log("message--->", message);
+    // console.log("message---2", message2);
     if (message) {
       const addMessage = await messageModel.findOneAndUpdate(
         chat,
@@ -66,4 +66,26 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
   }
 });
 
+//get my messages
+messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
+  try {
+    const chatMe = await messageModel.find({ from: req.user._id });
+    const chatYou = await messageModel.find({ to: req.user._id });
+    // console.log("chatme--", chatMe);
+    // console.log("chat you", chatYou);
+    if (chatMe && chatYou) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else if (chatMe) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else if (chatYou) {
+      res.send({ chatByMe: chatMe, chatByYou: chatYou });
+    } else {
+      next(
+        createHttpError(404, `The Post you are looking for does NOT exist!`)
+      );
+    }
+  } catch (error) {
+    next(createHttpError(404));
+  }
+});
 export default messagesRouter;
