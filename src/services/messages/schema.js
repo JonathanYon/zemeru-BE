@@ -14,11 +14,9 @@ const messageSchema = new Schema(
           enum: ["seen", "delivered"],
           default: "delivered",
         },
+        createdAt: { type: Date, default: Date.now() },
       },
     ],
-
-    to: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    from: { type: Schema.Types.ObjectId, required: true, ref: "User" },
   },
   { timestamps: true }
 );
