@@ -83,7 +83,14 @@ messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
 messagesRouter.get("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const chatMe = await messageModel.find({
-      $or: [{ from: req.params.id }, { to: req.params.id }],
+      messages: {
+        $elemMatch: {
+          $or: [
+            { from: req.user._id, to: req.params.id },
+            { from: req.params.id, to: req.user._id },
+          ],
+        },
+      },
     });
     if (chatMe) {
       res.send(chatMe);
