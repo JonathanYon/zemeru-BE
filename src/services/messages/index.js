@@ -8,34 +8,31 @@ const messagesRouter = Router();
 //message exchange
 messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const chat = {
-      from: req.user._id,
-      to: req.params.id,
-    };
-    const reply = {
-      from: req.params.id,
-      to: req.user._id,
-    };
+    const message = await messageModel.findOne({
+      messages: {
+        $elemMatch: {
+          $or: [
+            { from: req.user._id, to: req.params.id },
+            { from: req.params.id, to: req.user._id },
+          ],
+        },
+      },
+    });
 
-    const message = await messageModel.findOne(chat);
-    const message2 = await messageModel.findOne(reply);
-    // console.log("message--->", message);
-    // console.log("message---2", message2);
+    console.log("mess--->", message);
+
     if (message) {
       const addMessage = await messageModel.findOneAndUpdate(
-        chat,
         {
-          $push: {
-            messages: { ...req.body, from: req.user._id, to: req.params.id },
+          messages: {
+            $elemMatch: {
+              $or: [
+                { from: req.user._id, to: req.params.id },
+                { from: req.params.id, to: req.user._id },
+              ],
+            },
           },
         },
-        { new: true }
-      );
-      //   console.log("addmessage", addMessage);
-      res.status(201).send(addMessage);
-    } else if (message2) {
-      const addMessage = await messageModel.findOneAndUpdate(
-        reply,
         {
           $push: {
             messages: { ...req.body, from: req.user._id, to: req.params.id },
@@ -47,8 +44,6 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
       res.status(201).send(addMessage);
     } else {
       const newMessage = await messageModel({
-        from: req.user._id,
-        to: req.params.id,
         messages: [
           {
             message: req.body.message,
@@ -72,6 +67,9 @@ messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
     const chatMe = await messageModel.find({
       $or: [{ from: req.user._id }, { to: req.user._id }],
     });
+    //   .populate({
+    //     select: "-__v -createdAt -updatedAt -_id -from -to",
+    //   });
     if (chatMe) {
       res.send(chatMe);
     } else {
