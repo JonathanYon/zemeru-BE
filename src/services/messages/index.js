@@ -8,52 +8,59 @@ const messagesRouter = Router();
 //message exchange
 messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const message = await messageModel.findOne({
-      messages: {
-        $elemMatch: {
-          $or: [
-            { from: req.user._id, to: req.params.id },
-            { from: req.params.id, to: req.user._id },
-          ],
+    const check = req.user._id.toString() === req.params.id;
+    // console.log("check--->", check, req.user._id, req.params.id);
+
+    if (check) {
+      next(createHttpError(403, "Wrong Recipient Address"));
+    } else {
+      const message = await messageModel.findOne({
+        messages: {
+          $elemMatch: {
+            $or: [
+              { from: req.user._id, to: req.params.id },
+              { from: req.params.id, to: req.user._id },
+            ],
+          },
         },
-      },
-    });
+      });
 
-    console.log("mess--->", message);
+      console.log("mess--->", message);
 
-    if (message) {
-      const addMessage = await messageModel.findOneAndUpdate(
-        {
-          messages: {
-            $elemMatch: {
-              $or: [
-                { from: req.user._id, to: req.params.id },
-                { from: req.params.id, to: req.user._id },
-              ],
+      if (message) {
+        const addMessage = await messageModel.findOneAndUpdate(
+          {
+            messages: {
+              $elemMatch: {
+                $or: [
+                  { from: req.user._id, to: req.params.id },
+                  { from: req.params.id, to: req.user._id },
+                ],
+              },
             },
           },
-        },
-        {
-          $push: {
-            messages: { ...req.body, from: req.user._id, to: req.params.id },
-          },
-        },
-        { new: true }
-      );
-      //   console.log("addmessage", addMessage);
-      res.status(201).send(addMessage);
-    } else {
-      const newMessage = await messageModel({
-        messages: [
           {
-            message: req.body.message,
-            from: req.user._id,
-            to: req.params.id,
+            $push: {
+              messages: { ...req.body, from: req.user._id, to: req.params.id },
+            },
           },
-        ],
-      }).save();
+          { new: true }
+        );
+        //   console.log("addmessage", addMessage);
+        res.status(201).send(addMessage);
+      } else {
+        const newMessage = await messageModel({
+          messages: [
+            {
+              message: req.body.message,
+              from: req.user._id,
+              to: req.params.id,
+            },
+          ],
+        }).save();
 
-      res.status(201).send(newMessage);
+        res.status(201).send(newMessage);
+      }
     }
   } catch (error) {
     console.log(error);
@@ -65,7 +72,11 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
 messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
     const chatMe = await messageModel.find({
-      $or: [{ from: req.user._id }, { to: req.user._id }],
+      messages: {
+        $elemMatch: {
+          $or: [{ from: req.user._id }, { to: req.user._id }],
+        },
+      },
     });
     //   .populate({
     //     select: "-__v -createdAt -updatedAt -_id -from -to",
