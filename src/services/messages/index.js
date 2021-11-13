@@ -78,11 +78,11 @@ messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
         },
       },
     });
-    //   .populate({
-    //     select: "-__v -createdAt -updatedAt -_id -from -to",
-    //   });
+    // .populate(["messages.$*.from"]);
+
     if (chatMe) {
-      res.send(chatMe);
+      const chats = chatMe.map((chat) => chat.messages[0]);
+      res.send(chats);
     } else {
       next(createHttpError(404, "Not Chats to be Found!"));
     }
