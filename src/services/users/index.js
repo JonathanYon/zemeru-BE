@@ -68,7 +68,12 @@ usersRouter.post("/login", async (req, res, next) => {
 //get me
 usersRouter.get("/me", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    res.send(req.user);
+    console.log("meeeeeeeeeeee");
+    const me = await userModel
+      .findById(req.user)
+      .populate("followers.userId")
+      .populate("following.userId");
+    res.send(me);
   } catch (error) {
     console.log(error);
     next(error);
