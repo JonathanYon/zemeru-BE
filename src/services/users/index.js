@@ -228,7 +228,10 @@ usersRouter.get(
 usersRouter.get("/:userId", jwtAuthMiddleware, async (req, res, next) => {
   try {
     console.log("am in try---");
-    const user = await userModel.findById(req.params.userId);
+    const user = await userModel
+      .findById(req.params.userId)
+      .populate("followers.userId")
+      .populate("following.userId");
     if (user) {
       res.send(user);
     } else {
