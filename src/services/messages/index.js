@@ -71,20 +71,21 @@ messagesRouter.post("/:id", jwtAuthMiddleware, async (req, res, next) => {
 //get my messages
 messagesRouter.get("/", jwtAuthMiddleware, async (req, res, next) => {
   try {
-    const chatMe = await messageModel.find({
-      messages: {
-        $elemMatch: {
-          $or: [{ from: req.user._id }, { to: req.user._id }],
+    const chatMe = await messageModel
+      .find({
+        messages: {
+          $elemMatch: {
+            $or: [{ from: req.user._id }, { to: req.user._id }],
+          },
         },
-      },
-    });
-    // .populate(["messages.$*.from"]);
+      })
+      .populate(["messages.from", "messages.to"]);
 
     if (chatMe) {
-      const chats = chatMe.map((chat) => chat.messages[0]);
-      res.send(chats);
+      // const chats = chatMe.map((chat) => chat.messages[0]);
+      res.send(chatMe);
     } else {
-      next(createHttpError(404, "Not Chats to be Found!"));
+      next(createHttpError(404, "No Chats to be Found!"));
     }
   } catch (error) {
     next(createHttpError(404));
